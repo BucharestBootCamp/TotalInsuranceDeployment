@@ -1,0 +1,39 @@
+
+- name: Install artifacts and restart service
+  hosts: web-bucboot
+  gather_facts: no
+  serial: "{{ batch_size | default(10) }}"
+  max_fail_percentage: 100
+  become: yes
+
+  tasks:
+    - name: "Inform about new version"
+      debug:
+        msg: "Going to install TD {{ total_insurance_version }} on cluster {{ cluster_name }}"
+      tags: debug
+
+    - name: Restart Tomcat
+      service: name=tomcat state=restarted
+      tags:
+        - restart
+        - tomcat
+
+    - name: Wait for Tomcat8 to kick in
+      wait_for: port=8080 delay=2 timeout=60
+      tags:
+        - healthcheck
+        - tomcat
+
+    - name: Restart Nginx
+      service: name=nginx state=restarted
+      tags:
+        - restart
+        - nginx
+
+    - name: Wait for Nginx to kick in
+      wait_for: port=80 delay=2 timeout=60
+      tags:
+        - healthcheck
+        - nginx
+
+

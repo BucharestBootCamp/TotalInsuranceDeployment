@@ -1,0 +1,7 @@
+[all:vars]
+
+[web-bucboot]
+bucboot.k8s.adobeptime.com
+
+[cluster:children]
+web-bucboot
