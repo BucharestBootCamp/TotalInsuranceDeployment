@@ -1,2 +1,4 @@
-total_insurance_version: 1.0.0
+total_insurance_version: 1.0-20180424.124317-7
 cluster_name: BucBootCluster
+spring_profiles_active: jsondb
+local_file: files/VehiclesDatabase.xlsx

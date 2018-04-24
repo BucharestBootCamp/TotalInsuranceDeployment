@@ -9,8 +9,19 @@
   tasks:
     - name: "Inform about new version"
       debug:
-        msg: "Going to install TD {{ total_insurance_version }} on cluster {{ cluster_name }}"
+        msg: "Going to install TD {{ total_insurance_version }} on cluster {{ cluster_name }} with spring profiles {{ spring_profiles_active }}"
       tags: debug
+
+    - name: Copy local file {{ local_file }} to  /opt/tomcat/conf/{{ local_file | basename }}
+      tags: copy_files
+      copy: src={{ local_file }} dest=/opt/tomcat/conf/{{ local_file | basename }} owner=tomcat group=root mode=644
+      when: local_file is defined
+
+    - name: Download WAR
+      get_url: url="https://artifactory-uw2.adobeitc.com/artifactory/maven-adro-java-dev-bootcamp-snapshot/org/bootcamp/total-insurance/1.0-SNAPSHOT/total-insurance-{{ total_insurance_version }}.war" dest=/opt/tomcat/webapps/ROOT.war mode=0440 owner=tomcat
+
+    - name: Activate spring profiles
+      lineinfile: dest=/opt/tomcat/conf/catalina.properties regexp='^spring.profiles.active=' line="spring.profiles.active={{ spring_profiles_active }}"
 
     - name: Restart Tomcat
       service: name=tomcat state=restarted
