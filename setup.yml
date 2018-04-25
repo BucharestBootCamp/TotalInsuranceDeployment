@@ -3,6 +3,7 @@
   hosts: web-bucboot
   gather_facts: no
   serial: "{{ batch_size | default(10) }}"
+  # deploy_type: "{{ type | default('snapshot')}}"
   max_fail_percentage: 100
   become: yes
 
@@ -17,8 +18,13 @@
       copy: src={{ local_file }} dest=/opt/tomcat/conf/{{ local_file | basename }} owner=tomcat group=root mode=644
       when: local_file is defined
 
+    - name: "Fetch artifact"
+      debug:
+        msg: "Going to install artifact from: {{ artifactory_snapshot_repo }}/org/bootcamp/total-insurance/1.0-SNAPSHOT/total-insurance-{{ total_insurance_version }}.war"
+      tags: debug
+
     - name: Download WAR
-      get_url: url="https://artifactory-uw2.adobeitc.com/artifactory/maven-adro-java-dev-bootcamp-snapshot/org/bootcamp/total-insurance/1.0-SNAPSHOT/total-insurance-{{ total_insurance_version }}.war" dest=/opt/tomcat/webapps/ROOT.war mode=0440 owner=tomcat
+      get_url: url="{{ artifactory_snapshot_repo }}/org/bootcamp/total-insurance/1.0-SNAPSHOT/total-insurance-{{ total_insurance_version }}.war" dest=/opt/tomcat/webapps/ROOT.war mode=0440 owner=tomcat url_username=bucboot url_password={{ bucboot_password }} force=yes
 
     - name: Activate spring profiles
       lineinfile: dest=/opt/tomcat/conf/catalina.properties regexp='^spring.profiles.active=' line="spring.profiles.active={{ spring_profiles_active }}"

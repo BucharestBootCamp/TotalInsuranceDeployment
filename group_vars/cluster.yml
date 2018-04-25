@@ -2,3 +2,7 @@ total_insurance_version: 1.0-20180424.124317-7
 cluster_name: BucBootCluster
 spring_profiles_active: jsondb
 local_file: files/VehiclesDatabase.xlsx
+
+bucboot_password: "{{ vault_bucboot_password }}"
+artifactory_snapshot_repo: "{{ vault_artifactory_snapshot_repo }}"
+artifactory_release_repo: "{{ vault_artifactory_release_repo }}"

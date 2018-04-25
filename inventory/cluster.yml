@@ -5,3 +5,6 @@ bucboot.k8s.adobeptime.com
 
 [cluster:children]
 web-bucboot
+
+[vault:children]
+web-bucboot
