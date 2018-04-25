@@ -21,22 +21,22 @@
 
     - name: "Fetch artifact snapshot"
       debug:
-        msg: "Going to install artifact from: {{ artifactory_snapshot_repo }}/org/bootcamp/total-insurance/1.0-SNAPSHOT/total-insurance-{{ total_insurance_version }}.war"
+        msg: "Going to install artifact from: {{ artifactory_snapshot_repo }}/org/bootcamp/{{artifact_name}}/1.0-SNAPSHOT/{{artifact_name}}e-{{ total_insurance_version }}.war"
       tags: debug
       when: deploy_type == "snapshot"
 
     - name: "Fetch artifact release"
       debug:
-        msg: "Going to install artifact from: {{ artifactory_release_repo }}/org/bootcamp/total-insurance/1.0/total-insurance-{{ total_insurance_version }}.war"
+        msg: "Going to install artifact from: {{ artifactory_release_repo }}/org/bootcamp/{{artifact_name}}/1.0/{{artifact_name}}-{{ total_insurance_version }}.war"
       tags: debug
       when: deploy_type == "release"
 
     - name: Download WAR snapshot war
-      get_url: url="{{ artifactory_snapshot_repo }}/org/bootcamp/total-insurance/1.0-SNAPSHOT/total-insurance-{{ total_insurance_version }}.war" dest=/opt/tomcat/webapps/ROOT.war mode=0440 owner=tomcat url_username=bucboot url_password={{ bucboot_password }} force=yes
+      get_url: url="{{ artifactory_snapshot_repo }}/org/bootcamp/{{artifact_name}}/1.0-SNAPSHOT/{{artifact_name}}-{{ total_insurance_version }}.war" dest=/opt/tomcat/webapps/ROOT.war mode=0440 owner=tomcat url_username=bucboot url_password={{ bucboot_password }} force=yes
       when: deploy_type == "snapshot"
 
     - name: Download WAR release war
-      get_url: url="{{ artifactory_release_repo }}/org/bootcamp/total-insurance/1.0/total-insurance-{{ total_insurance_version }}.war" dest=/opt/tomcat/webapps/ROOT.war mode=0440 owner=tomcat url_username=bucboot url_password={{ bucboot_password }} force=yes
+      get_url: url="{{ artifactory_release_repo }}/org/bootcamp/{{artifact_name}}/1.0/{{artifact_name}}-{{ total_insurance_version }}.war" dest=/opt/tomcat/webapps/ROOT.war mode=0440 owner=tomcat url_username=bucboot url_password={{ bucboot_password }} force=yes
       when: deploy_type == "release"
 
     - name: Activate spring profiles
