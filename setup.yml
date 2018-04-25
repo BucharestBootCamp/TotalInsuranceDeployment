@@ -13,10 +13,10 @@
         msg: "Going to install TD {{ total_insurance_version }} on cluster {{ cluster_name }} with spring profiles {{ spring_profiles_active }}"
       tags: debug
 
-    - name: Copy local file {{ local_file }} to  /opt/tomcat/conf/{{ local_file | basename }}
+    - name: Copy local file {{ item }} to  /opt/tomcat/conf/{{ item | basename }}
       tags: copy_files
-      copy: src={{ local_file }} dest=/opt/tomcat/conf/{{ local_file | basename }} owner=tomcat group=root mode=644
-      when: local_file is defined
+      copy: src={{ item }} dest=/opt/tomcat/conf/{{ item | basename }} owner=tomcat group=root mode=644
+      with_items: "{{ local_files }}"
 
     - name: "Fetch artifact"
       debug:
