@@ -2,15 +2,16 @@
 - name: Install artifacts and restart service
   hosts: web-bucboot
   gather_facts: no
-  serial: "{{ batch_size | default(10) }}"
-  # deploy_type: "{{ type | default('snapshot')}}"
   max_fail_percentage: 100
   become: yes
+  vars:
+    db_type: "{{ db | default('jsondb') }}"
+    deploy_type: "{{ type | default('snapshot') }}"
 
   tasks:
     - name: "Inform about new version"
       debug:
-        msg: "Going to install TD {{ total_insurance_version }} on cluster {{ cluster_name }} with spring profiles {{ spring_profiles_active }}"
+        msg: "Going to install TD {{ total_insurance_version }} on cluster {{ cluster_name }} with spring profiles {{ db_type }}"
       tags: debug
 
     - name: Copy local file {{ item }} to  /opt/tomcat/conf/{{ item | basename }}
@@ -23,11 +24,22 @@
         msg: "Going to install artifact from: {{ artifactory_snapshot_repo }}/org/bootcamp/total-insurance/1.0-SNAPSHOT/total-insurance-{{ total_insurance_version }}.war"
       tags: debug
 
-    - name: Download WAR
+    - name: Download WAR snapshot war
       get_url: url="{{ artifactory_snapshot_repo }}/org/bootcamp/total-insurance/1.0-SNAPSHOT/total-insurance-{{ total_insurance_version }}.war" dest=/opt/tomcat/webapps/ROOT.war mode=0440 owner=tomcat url_username=bucboot url_password={{ bucboot_password }} force=yes
+      when: deploy_type == "snapshot"
+
+    - name: Download WAR release war
+      get_url: url="{{ artifactory_release_repo }}/org/bootcamp/total-insurance/1.0/total-insurance-{{ total_insurance_version }}.war" dest=/opt/tomcat/webapps/ROOT.war mode=0440 owner=tomcat url_username=bucboot url_password={{ bucboot_password }} force=yes
+      when: deploy_type == "release"
 
     - name: Activate spring profiles
-      lineinfile: dest=/opt/tomcat/conf/catalina.properties regexp='^spring.profiles.active=' line="spring.profiles.active={{ spring_profiles_active }}"
+      lineinfile: dest=/opt/tomcat/conf/catalina.properties regexp='^spring.profiles.active=' line="spring.profiles.active={{ db_type }}"
+
+    - name: Create env file
+      file: path=/opt/tomcat/bin/setenv.sh owner=tomcat mode="u=rwx,g=r,o=r" state=touch
+
+    - name: Activate db_type
+      lineinfile: dest=/opt/tomcat/bin/setenv.sh regexp='-Dfilepath=' line="CATALINA_OPTS+=\" -Dfilepath={{ file_path[db_type] }}\"" mode=0740 owner=tomcat
 
     - name: Restart Tomcat
       service: name=tomcat state=restarted
